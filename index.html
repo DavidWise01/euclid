@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Euclid — the first complete deductive system</title>
+<meta name="description" content="LOGIKĒ III — Euclid (fl. c. 300 BCE, Alexandria). Thales proved single truths, Aristotle systematised inference; Euclid built the first complete AXIOMATIC EDIFICE — from a handful of definitions, five postulates and five common notions, the Elements deduces ~465 theorems by pure logic. Proposition 1 (constructing an equilateral triangle) shown live, the very first proof, with its argument. Plus the fifth postulate — the parallel postulate, independent of the rest, whose denial opened non-Euclidean geometry and the shape of Einstein's universe. Honest: Euclid's axioms had gaps (Hilbert fixed them in 1899); the man is nearly unknown. David Lee Wise, two-layer honest.">
+<style>
+  :root{--bg:#0c0f17;--panel:#121622;--panel2:#19202f;--edge:#2a3346;--ink:#ede6d6;--dim:#b3ad9a;--faint:#7c7660;
+    --ochre:#d9b66a;--ochre2:#f0d79a;--proof:#5ad1ff;--proof2:#a7e6ff;--ok:#7fe0a0;--rose:#fb7185;--amber:#fbbf24;--ember:#fb923c;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code',Menlo,Consolas,monospace;--serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);line-height:1.58;background-image:radial-gradient(1100px 560px at 75% -10%,#1c2436 0%,transparent 55%),radial-gradient(900px 500px at 0% 100%,#14110a 0%,transparent 55%);}
+  .wrap{max-width:1000px;margin:0 auto;padding:44px 26px 90px}
+  header{border-bottom:1px solid var(--edge);padding-bottom:22px;margin-bottom:24px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--ochre);opacity:.95}
+  h1{font-family:Georgia,serif;font-size:38px;line-height:1.08;margin:.3em 0 .14em;font-weight:600}h1 em{color:var(--ochre2);font-style:italic}
+  .who{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.04em}
+  .sub{color:var(--dim);font-size:16px;max-width:74ch;margin-top:14px}.sub b{color:var(--ink)}
+  .verdicts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:22px 0}@media(max-width:720px){.verdicts{grid-template-columns:1fr}}
+  .vc{border:1px solid var(--edge);border-radius:11px;padding:13px 15px;border-top-width:3px;background:rgba(18,22,34,.6)}
+  .vc .badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em}
+  .vc.s{border-top-color:var(--ok)}.vc.s .badge{color:var(--ok)} .vc.m{border-top-color:var(--amber)}.vc.m .badge{color:var(--amber)} .vc.f{border-top-color:var(--ember)}.vc.f .badge{color:var(--ember)}
+  .vc p{font-size:12px;color:var(--dim);margin:6px 0 0;line-height:1.45}.vc p b{color:var(--ink)}
+  section{margin:36px 0}
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--ochre2);border-left:2px solid var(--ochre);padding-left:11px;margin:0 0 6px}
+  .lede{color:var(--dim);font-size:15px;margin:0 0 18px;max-width:80ch}
+  .panel{background:linear-gradient(180deg,var(--panel),#0a0d14);border:1px solid var(--edge);border-radius:14px;padding:20px;box-shadow:0 24px 60px -40px #000}
+  .controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:14px}
+  button{font-family:var(--mono);font-size:12px;color:var(--ink);background:#1a2030;border:1px solid var(--edge);border-radius:8px;padding:8px 13px;cursor:pointer;transition:.15s}
+  button:hover{background:#222b3e;border-color:var(--ochre)}button.on{background:#6e561f;border-color:var(--ochre2);color:#fff}
+  label.sl{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;align-items:center;gap:8px}input[type=range]{accent-color:var(--ochre);width:150px}
+  canvas{display:block;width:100%;border-radius:10px;background:#080b12;border:1px solid var(--edge);touch-action:none}
+  .cap{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:7px}
+  .pgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}@media(max-width:820px){.pgrid{grid-template-columns:1fr}}
+  .reads{display:flex;flex-direction:column;gap:12px}
+  .stat .v{font-family:var(--mono);font-size:24px;font-weight:600}.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .step{font-size:13.5px;color:var(--dim);border-left:2px solid var(--ochre);padding-left:12px;min-height:48px}.step b{color:var(--ink)}
+  .ax{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px}@media(max-width:620px){.ax{grid-template-columns:1fr}}
+  .ax .a{color:var(--dim);padding:4px 0;border-bottom:1px solid rgba(42,51,70,.5)}.ax .a b{color:var(--ochre2);font-family:var(--mono);font-size:11px;margin-right:6px}
+  .ax .a.fifth{color:var(--ink)}.ax .a.fifth b{color:var(--rose)}
+  .note{color:var(--dim);font-size:13.5px;border-left:2px solid var(--edge);padding-left:13px;margin:16px 0 0}.note b{color:var(--ink)}
+  footer{margin-top:44px;border-top:1px solid var(--edge);padding-top:18px;color:var(--faint);font-family:var(--mono);font-size:11px;line-height:1.7}
+  footer a,.bar2 a{color:var(--ochre)}.bar2{font-family:var(--mono);font-size:11.5px;margin-bottom:16px}.bar2 a{text-decoration:none;border-bottom:1px dotted #4a4126}
+  code{font-family:var(--mono);color:var(--ochre2);background:#15120a;padding:1px 5px;border-radius:5px}
+  blockquote{margin:14px 0;padding:10px 16px;border-left:3px solid var(--ochre);color:var(--ink);font-style:italic;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="bar2"><a href="https://davidwise01.github.io/ud0/">◄ UD0</a> &nbsp; <a href="https://davidwise01.github.io/aristotle/">← Aristotle</a> &nbsp; LOGIKĒ · III</div>
+<header>
+  <div class="kicker">LOGIKĒ · III · the first complete deductive system</div>
+  <h1>Euclid</h1>
+  <div class="who">fl. c. 300 BCE · Alexandria, under Ptolemy I</div>
+  <div class="sub">Thales proved a truth; Aristotle named the forms of valid argument. Euclid built the cathedral. In the <em>Elements</em> he laid down a handful of <b>definitions</b>, five <b>postulates</b>, and five <b>common notions</b> — then deduced from them, in strict order, some <b>465 theorems</b> across thirteen books, each resting only on what was proved before. Nothing assumed mid-stream, nothing taken on faith but the axioms at the foundation. For more than two thousand years, "to reason rigorously" simply meant "as in Euclid."</div>
+</header>
+<div class="verdicts">
+  <div class="vc s"><span class="badge">✓ STRONG</span><p><b>The axiomatic method.</b> A whole science deduced from ten stated assumptions — the <b>Elements</b> is the foundational model of deductive rigor, the most influential textbook ever written.</p></div>
+  <div class="vc m"><span class="badge">◐ GAPPED</span><p><b>Not actually airtight.</b> Euclid quietly used things he never stated (that two circles meet, that points lie "between"). <b>Hilbert (1899)</b> needed ~20 more axioms to close the gaps.</p></div>
+  <div class="vc f"><span class="badge">◔ A CHOICE</span><p><b>The fifth is independent.</b> The parallel postulate can't be proved from the rest — deny it and you get consistent <b>non-Euclidean geometries</b>, which turned out to be the shape of Einstein's universe.</p></div>
+</div>
+
+<section>
+  <h2>I · Proposition 1 — the first proof in the book</h2>
+  <p class="lede">The very first thing the <em>Elements</em> does is build an equilateral triangle on a given segment — using nothing but the postulates "you may draw a circle" and "you may draw a line." Step through Euclid's construction and watch the reason it works fall out of the radii: the two new sides are each equal to the base because each is a radius of its circle.</p>
+  <div class="panel">
+    <div class="controls"><button id="step" class="on">▶ next step</button><button id="reset">reset</button><span class="mono" style="font-size:11px;color:var(--faint)">(drag A or B to change the segment)</span></div>
+    <div class="pgrid">
+      <div><canvas id="prop" width="540" height="360"></canvas><div class="cap">segment <b style="color:var(--ochre)">AB</b> → circle ⊙A → circle ⊙B → intersection <b style="color:var(--proof)">C</b> → triangle ABC</div></div>
+      <div class="reads">
+        <div class="stat"><div class="v" id="lens" style="color:var(--proof2);font-size:18px">AB = AB</div><div class="k">the three sides</div></div>
+        <div class="step" id="stepText"><b>Given:</b> a segment AB. Goal: an equilateral triangle on it. Press “next step.”</div>
+        <div class="note">Postulates used: <b>3</b> (a circle of any centre and radius) and <b>1</b> (a line between two points). The conclusion — <code>AC = BC = AB</code> — comes from <b>Common Notion 1</b>: things equal to the same thing are equal to each other. That's the whole machine.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>II · The ten foundations</h2>
+  <p class="lede">Everything in 465 theorems rests on these. Five <b>postulates</b> (what you may construct) and five <b>common notions</b> (how equals behave) — and notice the fifth postulate is conspicuously longer and less obvious than the other four. People felt that for two millennia.</p>
+  <div class="ax">
+    <div class="a"><b>P1</b> A line joins any two points.</div>
+    <div class="a"><b>CN1</b> Things equal to the same thing are equal.</div>
+    <div class="a"><b>P2</b> A segment extends to a line.</div>
+    <div class="a"><b>CN2</b> Add equals to equals — still equal.</div>
+    <div class="a"><b>P3</b> A circle has any centre and radius.</div>
+    <div class="a"><b>CN3</b> Subtract equals from equals — still equal.</div>
+    <div class="a"><b>P4</b> All right angles are equal.</div>
+    <div class="a"><b>CN4</b> Things that coincide are equal.</div>
+    <div class="a fifth"><b>P5</b> If a line crossing two lines makes the same-side interior angles less than two right angles, those two lines meet on that side. <span style="color:var(--faint)">— the parallel postulate</span></div>
+    <div class="a"><b>CN5</b> The whole is greater than the part.</div>
+  </div>
+  <blockquote>"There is no royal road to geometry." <span style="color:var(--faint);font-style:normal;font-size:12px">— Euclid to Ptolemy I, who wanted a shortcut</span></blockquote>
+</section>
+
+<section>
+  <h2>III · The fifth postulate — the crack that opened a universe</h2>
+  <p class="lede">The fifth never looked self-evident, so for 2,000 years mathematicians tried to <em>prove</em> it from the other four. Every attempt failed — and in the 1800s Bolyai, Lobachevsky and Riemann saw why: it <b>can't</b> be proved, because it's a free choice. Deny it and geometry doesn't break; it changes. The clean test is a triangle's angles: they sum to exactly 180° only on a flat plane. Curve the world and the sum moves.</p>
+  <div class="panel">
+    <div class="controls"><label class="sl">curvature <input type="range" id="curv" min="-100" max="100" value="0"></label>
+      <button id="bflat" class="on">flat</button><button id="bsph">sphere</button><button id="bsad">saddle</button></div>
+    <div class="pgrid">
+      <div><canvas id="geo" width="540" height="300"></canvas><div class="cap">a triangle on a flat / spherical / saddle surface · the geometry it lives in decides its angle sum</div></div>
+      <div class="reads">
+        <div class="stat"><div class="v" id="sum" style="color:var(--proof2)">180.0°</div><div class="k">sum of the triangle's angles</div></div>
+        <div class="stat"><div class="v" id="kind" style="font-size:16px;color:var(--ochre2)">Euclidean (flat)</div><div class="k">which geometry</div></div>
+        <div class="note">On a <b>sphere</b> (positive curvature) the angles sum to <em>more</em> than 180° — parallel lines converge and meet. On a <b>saddle</b> (negative) they sum to <em>less</em> — parallels diverge. Euclid's is the knife-edge flat case. None is "the true" geometry; the universe, Einstein found, runs on the curved ones.</div>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="border-color:var(--amber)"><b style="color:var(--amber)">Gate kept on.</b> Euclid the <em>person</em> is almost a blank — we have a few anecdotes from centuries later and aren't certain he was one man rather than a school. His <em>method</em> is immortal, but his <em>execution</em> wasn't airtight: he leaned on unstated assumptions (that the two circles in Proposition 1 actually intersect; that a point can be "between" two others), which David Hilbert had to formalise with ~20 extra axioms in <b>1899</b> to make Greek geometry truly rigorous. The greatest deductive system ever built — and proof that even the gold standard had hidden joints.</p>
+</section>
+
+<footer>
+  EUCLID · LOGIKĒ III · two-layer honest<br>
+  Proposition 1 constructed live (⊙A ∩ ⊙B → C; AC=BC=AB by Common Notion 1) · the 5 postulates + 5 common notions · triangle angle-sum vs curvature (180° flat, &gt;180° sphere, &lt;180° saddle)<br>
+  Elements ~465 propositions, 13 books · 5th postulate independent (Bolyai, Lobachevsky, Riemann) · gaps closed by Hilbert's Grundlagen (1899)<br>
+  ← <a href="https://davidwise01.github.io/aristotle/">Aristotle</a> · next → the Stoics (propositional logic) · Llull · Leibniz · Boole · into the gate<br>
+  LOGIKĒ · the lineage of logical mathematics · governor David Lee Wise · CC-BY-ND-4.0
+</footer>
+</div>
+<script>
+"use strict";
+// MODULE I : Proposition 1
+(function(){
+  const cv=document.getElementById('prop');let A=[160,250],B=[380,250],stage=0,drag=null;
+  const texts=[
+   '<b>Given:</b> a segment AB. Goal: an equilateral triangle on it.',
+   '<b>Step 1 (Postulate 3):</b> draw circle ⊙A, centre A, radius AB.',
+   '<b>Step 2 (Postulate 3):</b> draw circle ⊙B, centre B, radius BA.',
+   '<b>Step 3:</b> the circles meet at point C.',
+   '<b>Step 4 (Postulate 1):</b> draw AC and BC. Now AC = AB (both radii of ⊙A) and BC = AB (both radii of ⊙B), so AC = BC = AB. <b>△ABC is equilateral.</b> ∎'
+  ];
+  function fit(){const r=cv.getBoundingClientRect();const d=window.devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height};}
+  function C(){const d=Math.hypot(B[0]-A[0],B[1]-A[1]);const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2;const ux=(B[0]-A[0])/d,uy=(B[1]-A[1])/d;const hx=-uy,hy=ux;const hh=Math.sqrt(3)/2*d;return [mx+hx*hh,my+hy*hh];}
+  function draw(){const{g,w,h}=fit();g.clearRect(0,0,w,h);const r=Math.hypot(B[0]-A[0],B[1]-A[1]);const Cp=C();
+    if(stage>=1){g.strokeStyle='rgba(217,182,106,.45)';g.lineWidth=1.5;g.beginPath();g.arc(A[0],A[1],r,0,7);g.stroke();}
+    if(stage>=2){g.strokeStyle='rgba(90,209,255,.45)';g.lineWidth=1.5;g.beginPath();g.arc(B[0],B[1],r,0,7);g.stroke();}
+    // base
+    g.strokeStyle='#d9b66a';g.lineWidth=2.5;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke();
+    if(stage>=4){g.strokeStyle='#a7e6ff';g.lineWidth=2.5;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(Cp[0],Cp[1]);g.lineTo(B[0],B[1]);g.stroke();
+      g.fillStyle='rgba(167,230,255,.08)';g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.lineTo(Cp[0],Cp[1]);g.closePath();g.fill();}
+    // points
+    function pt(p,lab,col){g.fillStyle=col;g.beginPath();g.arc(p[0],p[1],5,0,7);g.fill();g.fillStyle=col;g.font='14px Georgia';g.textAlign='center';g.fillText(lab,p[0],p[1]+ (lab==='C'?-12:24));}
+    if(stage>=3){g.fillStyle='#5ad1ff';g.shadowBlur=10;g.shadowColor='#5ad1ff';g.beginPath();g.arc(Cp[0],Cp[1],6,0,7);g.fill();g.shadowBlur=0;g.fillStyle='#5ad1ff';g.font='14px Georgia';g.textAlign='center';g.fillText('C',Cp[0],Cp[1]-12);}
+    pt(A,'A','#d9b66a');pt(B,'B','#d9b66a');
+    document.getElementById('stepText').innerHTML=texts[stage];
+    document.getElementById('lens').textContent=stage>=4?'AC = BC = AB ✓':'AB';
+    document.getElementById('lens').style.color=stage>=4?'#7fe0a0':'#a7e6ff';
+  }
+  document.getElementById('step').onclick=()=>{stage=Math.min(4,stage+1);draw();};
+  document.getElementById('reset').onclick=()=>{stage=0;draw();};
+  function hit(p,e){const r=cv.getBoundingClientRect();const mx=(e.touches?e.touches[0].clientX:e.clientX)-r.left,my=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return Math.hypot(mx-p[0],my-p[1])<18?[mx,my]:null;}
+  function md(e){const r=cv.getBoundingClientRect();if(hit(A,e))drag=A;else if(hit(B,e))drag=B;}
+  function mm(e){if(!drag)return;const r=cv.getBoundingClientRect();drag[0]=(e.touches?e.touches[0].clientX:e.clientX)-r.left;drag[1]=(e.touches?e.touches[0].clientY:e.clientY)-r.top;draw();if(e.touches)e.preventDefault();}
+  cv.addEventListener('mousedown',md);window.addEventListener('mousemove',mm);window.addEventListener('mouseup',()=>drag=null);
+  cv.addEventListener('touchstart',e=>{md(e);},{passive:true});cv.addEventListener('touchmove',mm,{passive:false});cv.addEventListener('touchend',()=>drag=null);
+  draw();window.addEventListener('resize',draw);
+})();
+// MODULE III : curvature & angle sum
+(function(){
+  const cv=document.getElementById('geo');let k=0;
+  function fit(){const r=cv.getBoundingClientRect();const d=window.devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height};}
+  function draw(){const{g,w,h}=fit();g.clearRect(0,0,w,h);
+    const cx=w/2,cy=h*0.54,R=Math.min(w*0.36,h*0.36);
+    // base triangle vertices
+    const V=[[cx,cy-R],[cx-R*0.92,cy+R*0.6],[cx+R*0.92,cy+R*0.6]];
+    // bow factor from curvature: positive = edges bow out (sphere), negative = bow in (saddle)
+    const bow=k*0.5;
+    g.strokeStyle='#a7e6ff';g.lineWidth=2.5;g.beginPath();
+    for(let i=0;i<3;i++){const a=V[i],b=V[(i+1)%3];const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+      const nx=mx-cx,ny=my-cy;const nl=Math.hypot(nx,ny)||1;const ctrl=[mx+nx/nl*bow*R,my+ny/nl*bow*R];
+      if(i===0)g.moveTo(a[0],a[1]);g.quadraticCurveTo(ctrl[0],ctrl[1],b[0],b[1]);}
+    g.closePath();g.stroke();g.fillStyle='rgba(167,230,255,.07)';g.fill();
+    // surface hint
+    g.strokeStyle=k>5?'rgba(217,182,106,.25)':(k<-5?'rgba(251,113,133,.22)':'rgba(124,118,96,.18)');g.lineWidth=1;
+    if(Math.abs(k)>5){for(let r2=0.4;r2<=1.3;r2+=0.3){g.beginPath();g.ellipse(cx,cy,R*r2,R*r2*(k>0?0.45:0.9),0,0,7);g.stroke();}}
+    // vertices
+    V.forEach(v=>{g.fillStyle='#d9b66a';g.beginPath();g.arc(v[0],v[1],4,0,7);g.fill();});
+    const sum=180+ k*0.6; // schematic: angle sum tracks curvature
+    document.getElementById('sum').textContent=sum.toFixed(1)+'°';
+    document.getElementById('kind').textContent= Math.abs(k)<=5?'Euclidean (flat)':(k>5?'spherical (positive)':'hyperbolic (saddle)');
+    document.getElementById('sum').style.color=Math.abs(k)<=5?'#a7e6ff':(k>5?'#f0d79a':'#fb7185');
+  }
+  document.getElementById('curv').oninput=function(){k=+this.value;syncBtn();draw();};
+  function setK(v){k=v;document.getElementById('curv').value=v;syncBtn();draw();}
+  function syncBtn(){document.getElementById('bflat').classList.toggle('on',Math.abs(k)<=5);document.getElementById('bsph').classList.toggle('on',k>5);document.getElementById('bsad').classList.toggle('on',k<-5);}
+  document.getElementById('bflat').onclick=()=>setK(0);document.getElementById('bsph').onclick=()=>setK(60);document.getElementById('bsad').onclick=()=>setK(-60);
+  draw();window.addEventListener('resize',draw);
+})();
+</script>
+</body>
+</html>
